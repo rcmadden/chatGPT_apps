@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Roman Numeral Converter</title>
+</head>
+<body>
+    <h1>Roman Numeral Converter</h1>
+    <form action="/convert" method="POST">
+        <label for="number">Enter a number:</label>
+        <input type="number" name="number" id="number">
+        <button type="submit">Convert</button>
+    </form>
+    {% if roman_numeral %}
+        <p>The Roman numeral is: {{ roman_numeral }}</p>
+    {% endif %}
+</body>
+</html>
