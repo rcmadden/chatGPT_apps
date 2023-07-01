@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text-to-Voice App - Result</title>
+</head>
+<body>
+    <h1>Result</h1>
+    <audio controls>
+        <source src="{{ url_for('play') }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <br>
+    <a href="{{ url_for('download') }}" download>Download MP3</a>
+</body>
+</html>

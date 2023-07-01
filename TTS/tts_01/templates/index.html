@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text-to-Voice App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 400px;
+            height: 150px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+
+        select {
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+        .play-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .audio-player {
+            display: none;
+        }
+        
+        #audio-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+        }
+        #text-display {
+            margin-top: 20px;
+        }
+        .highlight {
+  background-color: yellow;
+}
+
+    </style>
+</head>
+<body>
+    <h1>Text-to-Voice App</h1>
+    <form id="convert-form">
+        <label for="voice_type">Select voice type:</label>
+        <select name="voice_type">
+            {% for lang, lang_data in voice_options.items() %}
+                <optgroup label="{{ lang_data.name }}">
+                    {% for voice_type, voice_name in lang_data.options.items() %}
+                        <option value="{{ voice_type }}">{{ voice_name }}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endfor %}
+        </select>
+        <br>
+        <textarea id="text-input" name="text" placeholder="Enter your text..." rows="5" cols="50"></textarea>
+        <button type="button" class="play-button">Play</button>
+    </form>
+
+    <div id="audio-container">
+        <audio id="audio-player" controls>
+            Your browser does not support the audio element.
+        </audio>
+        <div id="text-display"></div>
+    </div>
+
+    <script>
+        const convertForm = document.getElementById('convert-form');
+        const playButton = document.querySelector('.play-button');
+        const audioPlayer = document.getElementById('audio-player');
+        const textInput = document.getElementById('text-input');
+        const textDisplay = document.getElementById('text-display');
+
+        playButton.addEventListener('click', () => {
+            const voiceType = document.querySelector('select[name="voice_type"]').value;
+            const text = textInput.value;
+
+            const formData = new FormData();
+            formData.append('text', text);
+            formData.append('voice_type', voiceType);
+
+            fetch('/convert', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const audioSrc = data.audio_src;
+                audioPlayer.src = audioSrc;
+                audioPlayer.style.display = 'block';
+
+                const words = text.trim().split(' ');
+
+                textDisplay.innerHTML = words.map(word => `<span>${word}</span>`).join(' ');
+
+                const wordSpans = Array.from(textDisplay.querySelectorAll('span'));
+
+                audioPlayer.addEventListener('play', () => {
+                    wordSpans.forEach((span, index) => {
+                        span.classList.remove('highlight');
+                        setTimeout(() => {
+                            span.classList.add('highlight');
+                        }, index * 250);
+                    });
+                });
+
+                audioPlayer.addEventListener('ended', () => {
+                    wordSpans.forEach(span => {
+                        span.classList.remove('highlight');
+                    });
+                });
+
+                audioPlayer.play();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            audioPlayer.style.display = 'none';
+            textDisplay.innerHTML = '';
+        });
+
+    </script>
+</body>
+</html>
