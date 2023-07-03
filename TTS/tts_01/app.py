@@ -30,6 +30,8 @@ def index():
 @app.route('/convert', methods=['POST'])
 def convert():
     text = request.form['text']
+    if not text:
+        text = 'Enter text to convert to speech'
     voice_type = request.form['voice_type']
     tts = gTTS(text=text, lang=voice_type, slow=False)
     tts.save(os.path.join(app.config['UPLOAD_FOLDER'], 'output.mp3'))
